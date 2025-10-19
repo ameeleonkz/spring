@@ -1,0 +1,59 @@
+spring:
+  application:
+    name: booking-service
+  datasource:
+    url: jdbc:h2:mem:bookingdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    database-platform: org.hibernate.dialect.H2Dialect
+    defer-datasource-initialization: true
+  sql:
+    init:
+      mode: always
+
+jwt:
+  secret: mySecretKeyForJWTTokenGenerationAndValidation1234567890
+  expiration: 3600000
+
+server:
+  port: 8081
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka/
+  instance:
+    prefer-ip-address: true
+    hostname: booking-service
+
+# Настройки Feign
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 10000
+        loggerLevel: basic
+      hotel-service:
+        connectTimeout: 3000
+        readTimeout: 8000
+  circuitbreaker:
+    enabled: true
+
+# Настройки Resilience4j для retry
+resilience4j:
+  retry:
+    instances:
+      hotel-service:
+        maxAttempts: 3
+        waitDuration: 500
+        exponentialBackoffMultiplier: 2
