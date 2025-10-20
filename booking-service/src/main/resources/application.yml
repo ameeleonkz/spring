@@ -57,3 +57,19 @@ resilience4j:
         maxAttempts: 3
         waitDuration: 500
         exponentialBackoffMultiplier: 2
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    ru.ameeleon.booking: DEBUG
+    org.springframework.boot.autoconfigure.sql.init: DEBUG
+    org.springframework.jdbc.datasource.init: DEBUG
+    org.springframework.jdbc.datasource.init.ScriptUtils: DEBUG

@@ -1,9 +1,7 @@
 package ru.ameeleon.booking.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,17 +11,19 @@ import ru.ameeleon.booking.entity.User;
 import ru.ameeleon.booking.repository.UserRepository;
 import ru.ameeleon.booking.security.JwtUtil;
 
-import java.util.Collections;
-
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class AuthService {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final AuthenticationManager authenticationManager;
-    private final JwtUtil jwtUtil;
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Transactional
     public String register(RegisterRequest request) {
@@ -34,21 +34,22 @@ public class AuthService {
         User user = new User();
         user.setUsername(request.getUsername());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole(User.Role.USER);
+        // Если роль передана, используем её, иначе USER
+        user.setRole(request.getRole() != null ? request.getRole() : User.Role.USER);
 
         userRepository.save(user);
 
-        return jwtUtil.generateToken(user.getUsername(), Collections.singletonList(user.getRole().name()));
+        return jwtUtil.generateToken(user.getUsername());
     }
 
     public String login(LoginRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-        );
-
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return jwtUtil.generateToken(user.getUsername(), Collections.singletonList(user.getRole().name()));
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Invalid credentials");
+        }
+
+        return jwtUtil.generateToken(user.getUsername());
     }
 }

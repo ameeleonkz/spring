@@ -45,3 +45,27 @@ curl -X POST http://localhost:8080/api/auth/register \
 Использование JWT
   curl -X GET http://localhost:8080/api/bookings/my \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
+
+
+
+  5. Доступ к Swagger UI
+После запуска сервисов:
+
+Booking Service Swagger: http://localhost:8081/swagger-ui.html
+Hotel Service Swagger: http://localhost:8082/swagger-ui.html
+Через API Gateway:
+
+http://localhost:8080/swagger-ui.html (если настроите проксирование)
+6. Использование Swagger UI
+Откройте Swagger UI
+Нажмите на кнопку "Authorize" в правом верхнем углу
+Введите JWT токен в формате: Bearer <ваш_токен>
+Теперь все запросы будут отправляться с этим токеном
+Swagger автоматически сгенерирует документацию для всех ваших контроллеров, включая:
+
+BookingController
+AuthController
+UserController
+HotelController
+RoomController
+ReservationController

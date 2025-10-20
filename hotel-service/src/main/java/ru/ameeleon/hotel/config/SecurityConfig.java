@@ -26,6 +26,8 @@ public class SecurityConfig {
           .csrf(csrf -> csrf.disable())
           .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
           .authorizeHttpRequests(auth -> auth
+              // Swagger endpoints
+              .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
               .requestMatchers("/api/hotels/**", "/api/rooms/**", "/api/reservations/**").permitAll()
               .anyRequest().authenticated()
           )
