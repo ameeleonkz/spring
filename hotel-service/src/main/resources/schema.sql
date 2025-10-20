@@ -1,32 +1,31 @@
-DROP TABLE IF EXISTS room_reservations;
+DROP TABLE IF EXISTS reservations;
 DROP TABLE IF EXISTS rooms;
 DROP TABLE IF EXISTS hotels;
 
-CREATE TABLE hotels (
+CREATE TABLE IF NOT EXISTS hotels (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    address VARCHAR(255) NOT NULL,
-    city VARCHAR(100) NOT NULL,
-    description VARCHAR(1000)
+    address VARCHAR(500) NOT NULL
 );
 
-CREATE TABLE rooms (
+CREATE TABLE IF NOT EXISTS rooms (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     hotel_id BIGINT NOT NULL,
     number VARCHAR(50) NOT NULL,
-    type VARCHAR(100) NOT NULL,
-    price DECIMAL(10, 2) NOT NULL,
-    available BOOLEAN DEFAULT TRUE,
-    times_booked INT DEFAULT 0,
-    FOREIGN KEY (hotel_id) REFERENCES hotels(id) ON DELETE CASCADE
+    available BOOLEAN NOT NULL DEFAULT TRUE,
+    times_booked INT NOT NULL DEFAULT 0,
+    price DECIMAL(10, 2),
+    FOREIGN KEY (hotel_id) REFERENCES hotels(id) ON DELETE CASCADE,
+    UNIQUE (hotel_id, number)
 );
 
-CREATE TABLE room_reservations (
+CREATE TABLE IF NOT EXISTS reservations (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     room_id BIGINT NOT NULL,
     booking_id BIGINT NOT NULL,
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
-    status VARCHAR(20) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE
 );

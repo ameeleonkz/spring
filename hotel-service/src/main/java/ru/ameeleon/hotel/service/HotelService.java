@@ -36,11 +36,12 @@ public class HotelService {
   }
 
   public Hotel updateHotel(Long id, Hotel hotelDetails) {
-    Hotel hotel = getHotelById(id);
+    Hotel hotel = hotelRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Hotel not found with id: " + id));
+
     hotel.setName(hotelDetails.getName());
     hotel.setAddress(hotelDetails.getAddress());
-    hotel.setCity(hotelDetails.getCity());
-    hotel.setDescription(hotelDetails.getDescription());
+
     return hotelRepository.save(hotel);
   }
 

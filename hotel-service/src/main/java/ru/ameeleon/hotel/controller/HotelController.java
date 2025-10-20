@@ -66,8 +66,6 @@ public class HotelController {
         dto.setId(hotel.getId());
         dto.setName(hotel.getName());
         dto.setAddress(hotel.getAddress());
-        dto.setCity(hotel.getCity());
-        dto.setDescription(hotel.getDescription());
         return dto;
     }
 
@@ -76,8 +74,6 @@ public class HotelController {
         hotel.setId(dto.getId());
         hotel.setName(dto.getName());
         hotel.setAddress(dto.getAddress());
-        hotel.setCity(dto.getCity());
-        hotel.setDescription(dto.getDescription());
         return hotel;
     }
 }

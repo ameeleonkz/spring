@@ -17,17 +17,12 @@ public class Room {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "hotel_id", nullable = false)
-  private Long hotelId;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "hotel_id", nullable = false)
+  private Hotel hotel;
 
-  @Column(nullable = false)
+  @Column(nullable = false, unique = true)
   private String number;
-
-  @Column(nullable = false)
-  private String type;
-
-  @Column(nullable = false)
-  private BigDecimal price;
 
   @Column(nullable = false)
   private Boolean available = true;
@@ -35,10 +30,6 @@ public class Room {
   @Column(name = "times_booked", nullable = false)
   private Integer timesBooked = 0;
 
-  @Column(length = 1000)
-  private String description;
-
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "hotel_id", insertable = false, updatable = false)
-  private Hotel hotel;
+  @Column(precision = 10, scale = 2)
+  private BigDecimal price;
 }

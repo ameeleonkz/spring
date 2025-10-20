@@ -20,7 +20,7 @@ public class GatewayConfig {
         return builder.routes()
                 // Booking Service Routes
                 .route("booking-service", r -> r
-                        .path("/api/auth/**", "/api/bookings/**", "/api/users/**")
+                        .path("/user/**", "/booking/**", "/bookings/**", "/api/auth/**", "/api/bookings/**", "/api/users/**")
                         .filters(f -> f.filter(authenticationFilter.apply(new AuthenticationFilter.Config())))
                         .uri("lb://booking-service"))
 

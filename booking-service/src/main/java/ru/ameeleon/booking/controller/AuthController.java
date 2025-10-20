@@ -11,7 +11,7 @@ import ru.ameeleon.booking.dto.RegisterRequest;
 import ru.ameeleon.booking.service.AuthService;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/user")
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -23,7 +23,7 @@ public class AuthController {
         return ResponseEntity.ok(new AuthResponse(token));
     }
 
-    @PostMapping("/login")
+    @PostMapping("/auth")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         String token = authService.login(request);
         return ResponseEntity.ok(new AuthResponse(token));
