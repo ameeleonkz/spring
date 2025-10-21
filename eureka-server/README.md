@@ -14,7 +14,4 @@ Eureka Server обеспечивает регистрацию и обнаруж�
 
 ```bash
 mvn spring-boot:run
-
-docker build -t eureka-server .
-docker run -p 8761:8761 eureka-server
-http://localhost:8761
+```

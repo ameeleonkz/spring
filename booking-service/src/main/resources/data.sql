@@ -1,9 +1,9 @@
 -- Insert Admin User
--- Username: admin, Password: admin123
+-- Username: admin, Password: password123
 INSERT INTO users (username, password, role) VALUES 
-('admin', '$2a$10$8.UnVuG9HHgffUDAlk8qfOuVGkqRzgVymGe07xd00DMxs.AQubh4a', 'ADMIN');
+('admin', '$2a$10$O4OVMWsabPM.4.EBDEKvAO3VDksJqM.YHwAWVcKRelDrsHNIsAUba', 'ADMIN');
 
 -- Insert Regular User
--- Username: user, Password: user123
+-- Username: user, Password: password123
 INSERT INTO users (username, password, role) VALUES 
-('user', '$2a$10$Jd8gHn2S8gRgeK8Yd1vSduSGPTpB2ACXKpItgqOKXMPxZjexJxEjC', 'USER');
+('user', '$2a$10$O4OVMWsabPM.4.EBDEKvAO3VDksJqM.YHwAWVcKRelDrsHNIsAUba', 'USER');

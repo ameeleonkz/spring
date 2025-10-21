@@ -1,71 +1,131 @@
-# spring
+# Microservices Booking System
+## Общее описание
 
-jdbc:h2:mem:hoteldb
-jdbc:h2:mem:bookingdb
+Система бронирования отелей, построенная на Spring Boot с использованием микросервисной архитектуры.
+Реализует полную цепочку — от регистрации пользователей и авторизации по JWT до резервирования номеров с двухфазным подтверждением и автоматической компенсацией при ошибках.
 
+## Состав системы
+- api-gateway	- Центральная точка входа, маршрутизация запросов, проверка JWT
+- booking-service	Управление пользователями и бронированиями
+- hotel-service	Управление отелями, номерами и резервами
+- eureka-server	Сервис-дискавери для регистрации и поиска микросервисов
 
+## Запуск
 
-# Сборка и запуск всех сервисов
-docker-compose up --build
+Запустить все сервисы:
 
-# Или в фоновом режиме
-docker-compose up -d --build
+`docker-compose up --build`
 
-# Просмотр логов
-docker-compose logs -f
+Сервисы будут доступны:
 
-# Остановка
-docker-compose down
+Gateway: http://localhost:8080
 
-Проверка работы
-Eureka Dashboard: http://localhost:8761
-API Gateway: http://localhost:8080
-Hotel Service: http://localhost:8082
-Booking Service: http://localhost:8081
+Booking: http://localhost:8081
 
-Регистрация
-curl -X POST http://localhost:8080/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "testuser",
-    "password": "password123",
-    "email": "test@example.com",
-    "firstName": "Test",
-    "lastName": "User"
-  }'
+Hotel: http://localhost:8082
 
-Авторизация
-  curl -X POST http://localhost:8080/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "testuser",
-    "password": "password123"
-  }'
+Eureka: http://localhost:8761
 
-Использование JWT
-  curl -X GET http://localhost:8080/api/bookings/my \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+Swagger UI:
 
+- Booking: http://localhost:8081/swagger-ui.html
 
+- Hotel: http://localhost:8082/swagger-ui.html
 
-  5. Доступ к Swagger UI
-После запуска сервисов:
+- Тестовые пользователи
+  - **Admin**: username: `admin`, password: `password123`
+  - **User**: username: `user`, password: `password123`
 
-Booking Service Swagger: http://localhost:8081/swagger-ui.html
-Hotel Service Swagger: http://localhost:8082/swagger-ui.html
-Через API Gateway:
+## Основные особенности реализации
+### 1. JWT-аутентификация и роли
 
-http://localhost:8080/swagger-ui.html (если настроите проксирование)
-6. Использование Swagger UI
-Откройте Swagger UI
-Нажмите на кнопку "Authorize" в правом верхнем углу
-Введите JWT токен в формате: Bearer <ваш_токен>
-Теперь все запросы будут отправляться с этим токеном
-Swagger автоматически сгенерирует документацию для всех ваших контроллеров, включая:
+Реализована на уровне Gateway и сервисов.
 
-BookingController
-AuthController
-UserController
-HotelController
-RoomController
-ReservationController
+Gateway фильтрует запросы, извлекая и проверяя Authorization: Bearer <token>.
+
+Сервисы дополнительно проверяют JWT через JwtAuthenticationFilter.
+
+Поддерживаются роли USER и ADMIN, разграничивающие права на создание/удаление отелей, бронирования и пользователей.
+
+### 2. Микросервисная архитектура и сервис-дискавери
+
+Все сервисы зарегистрированы в Eureka (@EnableDiscoveryClient).
+
+Gateway маршрутизирует запросы по шаблонам:
+
+/api/hotels/** и /api/rooms/** → HotelService
+
+/api/bookings/** и /api/users/** и /api/auth/** → BookingService
+
+Каждый сервис имеет собственную БД H2 (in-memory).
+
+### 3. Базы данных и схемы
+
+- BookingService: Таблица bookings с полями status, request_id, created_at
+
+- HotelService: Таблицы rooms, reservations, hotels.
+Поле times_booked используется для подсчёта популярности номеров
+(Файлы: schema.sql, data.sql)
+
+- наименования баз данных для просмотра в h2-console - jdbc:h2:mem:hoteldb, jdbc:h2:mem:bookingdb, пользователь sa
+
+### 4. Двухшаговая согласованность (Saga Pattern)
+
+Реализована цепочка бронирования с компенсацией:
+
+- BookingService инициирует бронирование (статус PENDING).
+
+- Делает запрос к HotelService /api/reservations/reserve — временное резервирование.
+
+- Если резерв успешен — вызывается /api/reservations/confirm → статус CONFIRMED.
+
+- Если при подтверждении или резервировании произошла ошибка — вызывается /api/reservations/cancel → статус CANCELLED.
+
+Таким образом обеспечена атомарность на уровне бизнес-логики при отсутствии распределённых транзакций.
+
+### 5. Идемпотентность запросов
+
+Каждый запрос на бронирование содержит requestId (UUID).
+
+В БД bookings это поле уникальное.
+
+При повторной доставке запроса с тем же requestId возвращается ранее созданная запись без повторных действий.
+
+### 6. Автоматический выбор номера и рекомендации
+
+Если клиент не указал roomId, система автоматически запрашивает HotelService /api/rooms/recommend
+
+Рекомендации сортируются по возрастанию times_booked, чтобы балансировать загрузку номеров
+(Файлы: RoomRepository.java, RoomController.java, BookingService.java)
+
+### 7. Коммуникация между сервисами
+
+Используется OpenFeign для REST-вызовов.
+
+### 8. Swagger и OpenAPI
+
+Подключён springdoc-openapi во всех сервисах.
+
+Эндпоинты /v3/api-docs и /swagger-ui.html доступны через Gateway.
+
+### 9. Тестирование
+
+Юнит-тесты с MockMvc для сценариев:
+
+- успешного бронирования,
+
+- отмены при ошибке HotelService,
+
+- повторного запроса с тем же requestId,
+
+- тайм-аута и компенсации.
+
+### Технологии
+
+Spring Boot 3.3+, Spring Cloud (Eureka, Gateway, OpenFeign)
+
+Spring Security + JWT
+
+H2 Database, Lombok, MapStruct, Swagger
+
+Docker Compose для локального запуска

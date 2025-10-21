@@ -16,16 +16,16 @@ eureka:
       defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
   server:
     enable-self-preservation: true
+    enable-termination-monitoring: true
     eviction-interval-timer-in-ms: 10000
+    heartbeat-expires-after: 30
+    renewal-interval-in-seconds: 30
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
-  endpoint:
-    health:
-      show-details: always
+        include: health,info
 
 logging:
   level:

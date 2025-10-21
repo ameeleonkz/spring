@@ -31,8 +31,8 @@
 
 ## Тестовые пользователи
 
-- **Admin**: username: `admin`, password: `admin123`
-- **User**: username: `john_doe`, password: `user123`
+- **Admin**: username: `admin`, password: `password123`
+- **User**: username: `user`, password: `password123`
 
 ## Запуск
 
